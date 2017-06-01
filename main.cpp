@@ -10,12 +10,13 @@ using namespace asio;
 class fwd
 {
 public:
-  fwd(asio::io_service& io_service, std::string ip, std::string puerto_tcp, std::string nombre_puerto_COM, unsigned int baudios) :
+  fwd(asio::io_service& io_service, std::string ip, std::string puerto_tcp, std::string nombre_puerto_COM, unsigned int baudios, std::string nom_serv) :
     iosvc_(io_service),
 
     nombre_puerto_com_(nombre_puerto_COM),
     baudios_(baudios),
     puerto_com_(iosvc_, nombre_puerto_com_),
+    nombre_servicio_ofrezco_(nom_serv),
 
     socket_(io_service)
   {
@@ -48,6 +49,7 @@ private:
   asio::serial_port puerto_com_;
   std::array<char,4096> rx_buf_pser_;
   std::string tx_buf_pser_;
+  std::string nombre_servicio_ofrezco_;
 
   std::array<char,4096> rx_buf_socket_;
   std::string tx_buf_socket_;
@@ -102,7 +104,8 @@ void fwd::conectar_socket()
           << ":" << this->socket_.remote_endpoint().port() << '\n';
       escribir_socket("mike;ftw;");
       Sleep(200);
-      escribir_socket("ofrecer pser");
+      string ya_quiero_avabar = "ofrecer " + nombre_servicio_ofrezco_;
+      escribir_socket(ya_quiero_avabar);
 
       leer_socket();
     }
@@ -160,13 +163,26 @@ void fwd::escribir_socket(std::string str)
   });
 }
 
-int main()
+int main(int argc, char* argv[])
 {
+  if(argc!=6)
+  {
+    cout << "Por favor ingresa:\n  *el IP del servidor\n  *el puerto TCP\n  *el numero de puerto\n  *el baud_rate del mismo\n  *el nombre de servicio\n"
+         << "e.g. nube.exe 192.168.1.10 3214 COM5 9600 bascula1\n";
+    cout << "sugerencias: puerto 201.139.98.214 o 192.168.1.10 y puerto 3214\n";
+    return 0;
+  }
+  string ip_servidor = argv[1];
+  string puerto_escucha = argv[2];
+  string puerto_com = argv[3];
+  int baudios = stoi(argv[4]);
+  string nombre_servicio = argv[5];
+
   try
   {
     asio::io_service servicio;
-    //fwd ftw(servicio, "127.0.0.1", "3214", "COM5", 9600);
-    fwd ftw(servicio, "201.139.98.214", "3214", "COM5", 9600);
+    //fwd ftw(servicio, "201.139.98.214", "3214", puerto_com, baudios);
+    fwd ftw(servicio, ip_servidor, "3214", puerto_com, baudios, nombre_servicio);
     ftw.iniciar();
 
     //dbg aver(servicio, "201.139.98.214", "3214");
