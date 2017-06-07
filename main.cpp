@@ -55,6 +55,7 @@ private:
   std::string tx_buf_socket_;
   asio::ip::tcp::socket socket_;
   asio::ip::tcp::endpoint endpoint_;
+  bool detener_{false};
 
 };
 
@@ -72,11 +73,16 @@ void fwd::leer_puerto_serial()
         escribir_socket(string(rx_buf_pser_.data()));
 
         memset(rx_buf_pser_.data(), '\0', rx_buf_pser_.size() );
-        leer_puerto_serial();
+        if(!detener_)
+          leer_puerto_serial();
       }
 
       else
-        cout << ec.value() << " " << ec.message() << endl;
+      {
+        cout << "Error leyendo puerto serie: " << ec.value() << " " << ec.message() << endl;
+        detener_ = true;
+      }
+
     });
 }
 
@@ -122,6 +128,10 @@ void fwd::conectar_socket()
         else
           std::cout << "Error cerrando y conectando: " << ec_cerrar.value() <<  ": " <<  ec_cerrar.message() << std::endl;
       }
+      else
+      {
+        detener_ = true;
+      }
         //...
     }
   });
@@ -140,11 +150,13 @@ void fwd::leer_socket()
       escribir_puerto_serial(string(rx_buf_socket_.data()));
 
       memset(rx_buf_socket_.data(), '\0', rx_buf_socket_.size() );
-      leer_socket();
+      if(!detener_)
+        leer_socket();
     }
     else
     {
       cout << "Error leyendo socket->" << ec.value() <<  ": " << ec.message() << std::endl;
+      detener_ = true;
     }
   });
 }
