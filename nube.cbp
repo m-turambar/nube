@@ -11,6 +11,7 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
+				<Option parameters="10.111.28.15 3214 COM3 115200 sak" />
 				<Compiler>
 					<Add option="-g" />
 					<Add option="-DASIO_STANDALONE" />

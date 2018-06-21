@@ -1,4 +1,5 @@
 #include <iostream>
+#include <string>
 //#include "fwd.h"
 //#include "dbg.h"
 #include "asio.hpp"
@@ -26,6 +27,14 @@ public:
     endpoint_ = iter->endpoint();
 
     puerto_com_.set_option(asio::serial_port_base::baud_rate(baudios_));
+
+    puerto_com_.set_option(asio::serial_port_base::parity(asio::serial_port_base::parity::none));
+    puerto_com_.set_option(asio::serial_port_base::character_size(8));
+    puerto_com_.set_option(asio::serial_port_base::flow_control(asio::serial_port_base::flow_control::none));
+    puerto_com_.set_option(asio::serial_port_base::stop_bits(asio::serial_port_base::stop_bits::one));
+
+    //nuevo
+
   }
   void iniciar()
   {
@@ -67,10 +76,22 @@ void fwd::leer_puerto_serial()
     {
       if(!ec)
       {
+          /*
+        stringstream ss(rx_buf_pser_.data());
+        string tmp;
+        while(std::getline(ss, tmp, '\r') ) {
+            if(tmp.find("BLUETUT") != std::string::npos)
+            {
+                cout << tmp << '\n';
+                escribir_socket(tmp);
+            }
+        }
+        */
         cout.write(rx_buf_pser_.data(), length);
 
         /**retransmitir a la nube*/
         escribir_socket(string(rx_buf_pser_.data()));
+
 
         memset(rx_buf_pser_.data(), '\0', rx_buf_pser_.size() );
         if(!detener_)
